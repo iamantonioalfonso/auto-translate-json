@@ -1,5 +1,5 @@
-import * as path from "path";
-import * as fs from "fs";
+import {dirname, basename} from "path";
+import { readdirSync, readFile, writeFile} from "fs";
 
 export class Files {
   folderPath: string;
@@ -7,9 +7,8 @@ export class Files {
   targetLocales: Array<string>;
 
   constructor(filePath: string) {
-    this.folderPath = path.dirname(filePath);
-    var fileName = path.basename(filePath);
-    this.sourceLocale = this.getLocaleFromFilename(fileName);
+    this.folderPath = dirname(filePath);
+    this.sourceLocale = this.getLocaleFromFilename(basename(filePath));
     this.targetLocales = this.getTargetLocales();
   }
 
@@ -18,12 +17,11 @@ export class Files {
   }
 
   private getTargetLocales(): string[] {
-    var locales = new Array();
-
-    var files = fs.readdirSync(this.folderPath);
+    const locales = [];
+    const files = readdirSync(this.folderPath);
 
     files.forEach((file) => {
-      var locale = this.getLocaleFromFilename(file);
+      const locale = this.getLocaleFromFilename(file);
       if (locale !== this.sourceLocale) {
         locales.push(locale);
       }
@@ -33,32 +31,27 @@ export class Files {
   }
 
   async loadJsonFromLocale(locale: string): Promise<any> {
-    var filename = this.folderPath + "/" + locale + ".json";
-    var data = await this.readFileAsync(filename);
+    const filename = this.folderPath + "/" + locale + ".json";
+    let data = await this.readFileAsync(filename);
 
     // handle empty files
-    if (!data) {
-      data = "{}";
-    }
+    if (!data) { data = "{}"; }
 
-    var json = JSON.parse(data);
-
-    return json;
+    return JSON.parse(data);
   }
 
   private async readFileAsync(filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      fs.readFile(filename, (error, data) => {
+      readFile(filename, (error, data) => {
         error ? reject(error) : resolve(data.toString());
       });
     });
   }
 
   saveJsonToLocale(locale: string, file: any) {
-    var filename = this.folderPath + "/" + locale + ".json";
+    const filename = this.folderPath + "/" + locale + ".json";
+    const data = JSON.stringify(file, null, "  ");
 
-    var data = JSON.stringify(file, null, "  ");
-
-    fs.writeFileSync(filename, data, "utf8");
+    writeFile(filename, data, { encoding: 'utf8' }, () => null);
   }
 }

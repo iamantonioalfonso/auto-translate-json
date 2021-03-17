@@ -22,28 +22,28 @@ export class GoogleTranslate {
   }
 
   async translateText(text: string, targetLocale: string): Promise<string> {
-    var pattern = /{(.*?)}/g;
-    var args = text.match(pattern);
+    const pattern = /{(.*?)}/g;
+    const args = text.match(pattern);
 
     // replace arguments with numbers
     if (args) {
-      var i = 0;
+      let i = 0;
       for (let arg of args) {
         text = text.replace(arg, "{" + i + "}");
         i++;
       }
     }
 
-    var result = "";
+    let result = "";
 
     try {
-      var translations = await this.googleTranslate.translate(
+      const translations = await this.googleTranslate.translate(
         text,
         targetLocale
       );
       result = translations[0];
     } catch (error) {
-      var message = error.message;
+      let message = error.message;
       if (error.message === "Invalid Value") {
         message = "Invalid Locale " + targetLocale;
       }
@@ -53,7 +53,7 @@ export class GoogleTranslate {
 
     // replace arguments with numbers
     if (args) {
-      var i = 0;
+      let i = 0;
       for (let arg of args) {
         result = result.replace("{" + i + "}", arg);
         i++;
